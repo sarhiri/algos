@@ -19,3 +19,51 @@
 // Input: n = 3, edges = [[0,1]], succProb = [0.5], start = 0, end = 2
 // Output: 0.00000
 // Explanation: There is no path between 0 and 2.
+
+/**
+ * @param {number} n
+ * @param {number[][]} edges
+ * @param {number[]} succProb
+ * @param {number} start_node
+ * @param {number} end_node
+ * @return {number}
+ */
+var maxProbability = function(n, edges, succProb, start_node, end_node) {
+  const graph = new Map();
+ 
+ // Create the graph representation
+ for (let i = 0; i < edges.length; i++) {
+     const [a, b] = edges[i];
+     const prob = succProb[i];
+     if (!graph.has(a)) graph.set(a, []);
+     if (!graph.has(b)) graph.set(b, []);
+     graph.get(a).push([b, prob]);
+     graph.get(b).push([a, prob]);
+ }
+
+ // Priority queue to store the node and its probability
+ const pq = new MaxPriorityQueue({ priority: x => x[1] });
+ pq.enqueue([start_node, 1]);
+ 
+ // Initialize the max probability map
+ const maxProb = Array(n).fill(0);
+ maxProb[start_node] = 1;
+
+ while (!pq.isEmpty()) {
+     const [node, prob] = pq.dequeue().element;
+
+     if (node === end_node) {
+         return prob;
+     }
+     
+     for (const [neighbor, edgeProb] of graph.get(node) || []) {
+         const newProb = prob * edgeProb;
+         if (newProb > maxProb[neighbor]) {
+             maxProb[neighbor] = newProb;
+             pq.enqueue([neighbor, newProb]);
+         }
+     }
+ }
+ 
+ return 0;
+};
